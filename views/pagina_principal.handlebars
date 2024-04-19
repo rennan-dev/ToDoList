@@ -1,0 +1,36 @@
+{{>menu_logado}}
+
+<!-- Dentro do seu main.handlebars -->
+<main class="principal-container d-flex flex-column">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h3 style="color: aliceblue;">Hoje</h3>
+            </div>
+            <div class="col-md-6 d-flex justify-content-end align-items-center">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#adicionarListaModal">
+                    Adicionar Tarefa <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-3">
+        <div class="row justify-content-center">
+            <div class="card border border-primary custom-card">
+                <div class="card-body custom-bord">
+                    <!-- Aqui você pode adicionar o conteúdo do seu card -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="projetos-container">
+        <!-- Aqui inclua o {{>projetos}} -->
+        {{>projetos}}
+    </div>
+</main>
+
+
+
+{{>footer}}

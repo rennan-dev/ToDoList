@@ -1,0 +1,46 @@
+{{>menu_login}}
+
+<main class="login-container" style="color: #fff;">
+<div class="container">
+    <div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+        <div class="card-header text-center" style="background-color: #212529; color: #fff; font-size: 40pt; font-family: 'medieval', sans-serif;">
+            Cadastro
+        </div>
+        <div class="card-body-login">
+
+            <form action="/cadastrar_usuario" method="post">
+                <div class="form-group mt-2">
+                    <label for="nome">Nome:</label>
+                    <input type="text" class="form-control" name="nome" id="nome" placeholder="Digite seu nome">
+                </div>
+                <div class="form-group mt-2">
+                    <label for="email">E-mail:</label>
+                    <input type="email" class="form-control" name="email" id="email" placeholder="Digite seu e-mail">
+                </div>
+                <div class="form-group mt-2">
+                    <label for="senha">Senha:</label>
+                    <input type="password" class="form-control" name="senha" id="senha" placeholder="Digite sua senha">
+                </div>
+                <div class="form-group mt-2">
+                    <label for="senha">Confirme sua senha:</label>
+                    <input type="password" class="form-control" name="confirmarSenha" id="confirmar-senha" placeholder="Digite sua senha novamente">
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary mt-3">Cadastre-se</button>
+                </div>
+            </form>
+
+            <div class="text-center mt-3 links">
+                <p>Já possui uma conta? <a href="/login">Conecte-se</a></p>
+            </div>
+
+        </div>
+        </div>
+    </div>
+    </div>
+</div>
+</main>
+
+{{>footer}}

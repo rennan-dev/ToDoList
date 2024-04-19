@@ -1,0 +1,121 @@
+@font-face {
+    font-family: 'medieval';
+    src: url('The Centurion.otf') format('opentype'), url('The Centurion.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'iberica';
+    src: url('LongaIberica-DEMO.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    height: 100vh;
+    background: linear-gradient(to bottom, #000000, #808080);
+    background-color: #808080; 
+}
+
+.login-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.principal-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-body {
+    width: 100%; /* Ocupa toda a largura disponível */
+    max-width: 600px; /* Largura máxima do card */
+    height: 70vh; /* Altura do card */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-body-login {
+    width: 100%; /* Ocupa toda a largura disponível */
+    max-width: 600px; /* Largura máxima do card */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.custom-card {
+    background-color: transparent;
+}
+
+/*section start*/
+.projetos-container {
+    position: absolute;
+    left: 70px;
+    top: 50%; /* Posiciona a partir do topo da página */
+    transform: translateY(-50%); /* Ajusta para que fique centralizado verticalmente */
+}
+
+.custom-link {
+    color: white; 
+    text-decoration: none;
+    list-style: none; 
+    transition: color 0.3s; /* Adiciona uma transição suave de cor */
+}
+
+li {
+    text-decoration: none;
+    list-style: none;
+}
+
+/* Estilizando o botão */
+.custom-button {
+    white-space: nowrap; /* Evita quebra de linha */
+}
+
+.custom-link:hover {
+    color: lightblue; 
+}
+/*section end*/
+
+
+.links {
+    font-size: 13px;
+}
+
+/* img {
+    max-width: 100%;
+    height: auto; 
+} */
+
+/*menu start*/
+.navbar-custom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* Garante que o menu fique acima do conteúdo */
+    background-color: #000000; /* Cor preta */
+}
+
+.navbar-brand {
+    display: block; /* Exibir como um bloco */
+    text-align: center; /* Centralizar o texto */
+}
+
+.navbar-brand span {
+    display: block; /* Exibir cada span como um bloco */
+}
+
+.navbar-brand span {
+    font-size: 2em; /* Tamanho da fonte */
+    font-family: 'medieval'; /* Fonte */
+    color: #ffffff; /* Cor do texto */
+    margin: 5px 0; /* Margem entre os spans */
+}
+/*menu end*/
