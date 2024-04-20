@@ -38,5 +38,13 @@ router.get('/logout', function(req,res) {
     servico.logout(req,res);
 });
 
+router.post('/adicionar_projeto', function(req,res) {
+    servico.adicionar_projeto(req,res);
+});
+
+router.get('/listar_projetos', function(req,res) {
+    servico.listarProjetos(req,res);
+});
+
 // Exportar o router
 module.exports = router;

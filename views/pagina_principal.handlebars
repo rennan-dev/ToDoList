@@ -5,7 +5,9 @@
     <div class="container">
         <div class="row">
             <div class="col-md-6">
-                <h3 style="color: aliceblue;">Hoje</h3>
+                <ul class="custom-list-selecionado">
+                    <li><a href="#" class="custom-link selected">{{session.usuario.projeto_selecionado}}</a></li>
+                </ul>
             </div>
             <div class="col-md-6 d-flex justify-content-end align-items-center">
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#adicionarListaModal">
@@ -26,7 +28,6 @@
     </div>
 
     <div class="projetos-container">
-        <!-- Aqui inclua o {{>projetos}} -->
         {{>projetos}}
     </div>
 </main>

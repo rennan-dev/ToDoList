@@ -56,7 +56,7 @@ body {
 /*section start*/
 .projetos-container {
     position: absolute;
-    left: 70px;
+    left: 50px;
     top: 50%; /* Posiciona a partir do topo da página */
     transform: translateY(-50%); /* Ajusta para que fique centralizado verticalmente */
 }
@@ -74,8 +74,13 @@ li {
 }
 
 /* Estilizando o botão */
-.custom-button {
+.custom-button, .form-control-2 {
     white-space: nowrap; /* Evita quebra de linha */
+    width: 180px;
+}
+
+.adicionar-projeto-input {
+    width: 180px;
 }
 
 .custom-link:hover {

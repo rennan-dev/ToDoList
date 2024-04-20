@@ -20,33 +20,43 @@ function cadastrar_novo_usuario(req, res) {
     const confirmarSenha = req.body.confirmarSenha;
 
     if (!nome || !email || !senha || !confirmarSenha) {
-        console.log('erro primordial');
+        console.log('Erro primordial');
         return res.render('cadastro', { erro: 'Por favor, preencha todos os campos.' });
     }
 
     if (senha != confirmarSenha) {
-        console.log('erro de senha');
+        console.log('Erro de senha');
         return res.render('cadastro', { erro: 'Senha e Confirmar senha precisam estar iguais.' });
     }
 
-    const sql = "INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)";
-    const values = [nome, email, senha];
+    const sqlInsertUsuario = "INSERT INTO usuarios (nome, email, senha, projeto_selecionado) VALUES (?, ?, ?, ?)";
+    const valuesUsuario = [nome, email, senha, 'Hoje'];
 
-    conexao.query(sql, values, function(err, result) {
+    conexao.query(sqlInsertUsuario, valuesUsuario, function(err, result) {
         if (err) {
-            console.log('erro 1');
-            return console.error('Erro ao executar consulta:', err.message);
+            console.log('Erro ao inserir novo usuário:', err.message);
+            return res.render('cadastro', { erro: 'Erro ao criar conta.' });
         }
 
-        // Armazenar informações do usuário na sessão
-        req.session.usuario = {
-            nome: nome,
-            email: email
-        };
+        // Criação do projeto 'Hoje' para o novo usuário
+        const sqlInsertProjeto = "INSERT INTO projetos (nome, usuario_nome) VALUES (?, ?)";
+        const valuesProjeto = ['Hoje', nome];
 
-        console.log('Novo usuário inserido com sucesso!');
+        conexao.query(sqlInsertProjeto, valuesProjeto, function(err, result) {
+            if (err) {
+                console.log('Erro ao criar projeto "Hoje":', err.message);
+                return res.render('cadastro', { erro: 'Erro ao criar conta.' });
+            }
 
-        res.redirect('/pagina_principal');
+            console.log('Novo usuário e projeto "Hoje" criados com sucesso!');
+            req.session.usuario = {
+                nome: nome,
+                email: email,
+                projeto_selecionado: 'Hoje'
+            };
+
+            res.redirect('/pagina_principal');
+        });
     });
 }
 
@@ -91,15 +101,57 @@ function login_usuario(req, res) {
             const nome = results[0].nome;
             req.session.usuario = {
                 email: email,
-                nome: nome
+                nome: nome,
+                projeto_selecionado: 'Hoje'
             };
-            res.redirect('/pagina_principal');
+            res.render('pagina_principal', { session: req.session });
         } else {
             res.render('login', { erro: 'Credenciais inválidas. Por favor, tente novamente.' });
         }
     });
 }
 
+function adicionar_projeto(req, res) {
+    const nome = req.body.nome;
+    const usuario = req.session.usuario; // Acesse as informações do usuário da sessão
+
+    if (!nome || !usuario) {
+        console.log("Erro primordial");
+        return res.status(400).json({ erro: 'Por favor, preencha todos os campos' });
+    }
+
+    // Inserir os dados diretamente na tabela de projetos
+    const sql = 'INSERT INTO projetos (nome, usuario_nome) VALUES (?, ?)';
+    const values = [nome, usuario.nome];
+
+    conexao.query(sql, values, (err, results) => {
+        if (err) {
+            console.error("Erro ao adicionar projeto:", err);
+            // Lidar com o erro, por exemplo, retornar uma mensagem de erro na resposta JSON
+            return res.status(500).json({ erro: 'Erro ao adicionar projeto' });
+        }
+        
+        console.log("Projeto adicionado com sucesso");
+        // Retornar uma mensagem de sucesso na resposta JSON
+        res.status(200).json({ mensagem: 'Projeto adicionado com sucesso' });
+    });
+}
+
+function listarProjetos(req, res) {
+    // Consulta ao banco de dados para obter os projetos cadastrados
+    const sql = 'SELECT nome FROM projetos WHERE usuario_nome = ?'; // Adapte conforme a sua estrutura de dados
+    const usuario = req.session.usuario; // Acesse as informações do usuário da sessão
+
+    conexao.query(sql, [usuario.nome], (err, results) => {
+        if (err) {
+            console.error("Erro ao buscar projetos:", err);
+            return res.status(500).json({ erro: 'Erro ao buscar projetos' });
+        }
+
+        // Enviar os resultados como resposta JSON
+        res.status(200).json({ projetos: results });
+    });
+}
 
 //verificar se o usuarioestá logado
 // function verificarSessao(req, res, next) {
@@ -120,5 +172,7 @@ module.exports = {
     cadastrar_novo_usuario, 
     pagina_principal,
     logout,
-    login_usuario
+    login_usuario,
+    adicionar_projeto,
+    listarProjetos
 };
