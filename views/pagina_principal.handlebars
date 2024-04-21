@@ -1,37 +1,31 @@
 {{>menu_logado}}
 
-<!-- Dentro do seu main.handlebars -->
-<main class="principal-container d-flex flex-column">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <ul class="custom-list-selecionado">
-                    <li><a href="#" class="custom-link selected">{{session.usuario.projeto_selecionado}}</a></li>
-                </ul>
-            </div>
-            <div class="col-md-6 d-flex justify-content-end align-items-center">
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#adicionarListaModal">
-                    Adicionar Tarefa <i class="fas fa-plus"></i>
-                </button>
-            </div>
-        </div>
-    </div>
+<div class="container-fluid" style="display: flex; flex-direction: row;">
 
-    <div class="container mt-3">
-        <div class="row justify-content-center">
-            <div class="card border border-primary custom-card">
-                <div class="card-body custom-bord">
-                    <!-- Aqui você pode adicionar o conteúdo do seu card -->
+    <!-- Nova seção ocupando a parte da esquerda -->
+    <section style="flex: 0 0 25%; padding: 20px;">
+        <div class="d-flex align-items-center justify-content-center h-100"> <!-- Utilizando flexbox para centralizar -->
+            <div class="card" style="height: 50%; width: 75%">
+                <div class="card-body">
+                    <h5 class="card-title">Novo Card</h5>
+                    <p class="card-text">Conteúdo do novo card.</p>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="projetos-container">
-        {{>projetos}}
-    </div>
-</main>
+    <!-- Main ocupando a parte da direita -->
+    <main style="flex: 1; padding: 20px;">
+        <div class="d-flex align-items-center justify-content-center h-100 w-100"> <!-- Utilizando flexbox para centralizar -->
+            <div class="card" style="height: 50%; width: 75%">
+                <div class="card-body">
+                    <h5 class="card-title">Novo Card</h5>
+                    <p class="card-text">Conteúdo do novo card.</p>
+                </div>
+            </div>
+        </div>
+    </main>
 
-
+</div>
 
 {{>footer}}

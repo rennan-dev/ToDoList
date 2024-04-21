@@ -18,80 +18,13 @@ body {
     background-color: #808080; 
 }
 
-.login-container {
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+main {
+    display: flex; /* Torna o <main> um contêiner flexível */
+    justify-content: center; /* Alinha o conteúdo horizontalmente no centro */
+    align-items: center; /* Alinha o conteúdo verticalmente no centro */
+    height: 100vh; /* Define a altura para ocupar toda a altura da viewport */
 }
 
-.principal-container {
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.card-body {
-    width: 100%; /* Ocupa toda a largura disponível */
-    max-width: 600px; /* Largura máxima do card */
-    height: 70vh; /* Altura do card */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.card-body-login {
-    width: 100%; /* Ocupa toda a largura disponível */
-    max-width: 600px; /* Largura máxima do card */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.custom-card {
-    background-color: transparent;
-}
-
-/*section start*/
-.projetos-container {
-    position: absolute;
-    left: 50px;
-    top: 50%; /* Posiciona a partir do topo da página */
-    transform: translateY(-50%); /* Ajusta para que fique centralizado verticalmente */
-}
-
-.custom-link {
-    color: white; 
-    text-decoration: none;
-    list-style: none; 
-    transition: color 0.3s; /* Adiciona uma transição suave de cor */
-}
-
-li {
-    text-decoration: none;
-    list-style: none;
-}
-
-/* Estilizando o botão */
-.custom-button, .form-control-2 {
-    white-space: nowrap; /* Evita quebra de linha */
-    width: 180px;
-}
-
-.adicionar-projeto-input {
-    width: 180px;
-}
-
-.custom-link:hover {
-    color: lightblue; 
-}
-/*section end*/
-
-
-.links {
-    font-size: 13px;
-}
 
 /* img {
     max-width: 100%;
