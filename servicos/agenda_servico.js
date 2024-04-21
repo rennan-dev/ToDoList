@@ -149,32 +149,6 @@ function login_usuario(req, res) {
 //res.redirect('/pagina_principal');
 //res.render('pagina_principal', { session: req.session });
 
-function adicionar_projeto(req, res) {
-    const nome = req.body.nome;
-    const usuario = req.session.usuario; // Acesse as informações do usuário da sessão
-
-    if (!nome || !usuario) {
-        console.log("Erro primordial");
-        return res.status(400).json({ erro: 'Por favor, preencha todos os campos' });
-    }
-
-    // Inserir os dados diretamente na tabela de projetos
-    const sql = 'INSERT INTO projetos (nome, usuario_nome) VALUES (?, ?)';
-    const values = [nome, usuario.nome];
-
-    conexao.query(sql, values, (err, results) => {
-        if (err) {
-            console.error("Erro ao adicionar projeto:", err);
-            // Lidar com o erro, por exemplo, retornar uma mensagem de erro na resposta JSON
-            return res.status(500).json({ erro: 'Erro ao adicionar projeto' });
-        }
-        
-        console.log("Projeto adicionado com sucesso");
-        // Retornar uma mensagem de sucesso na resposta JSON
-        res.status(200).json({ mensagem: 'Projeto adicionado com sucesso' });
-    });
-}
-
 //verificar se o usuarioestá logado
 // function verificarSessao(req, res, next) {
 //     if (req.session && req.session.usuario) {
@@ -186,24 +160,76 @@ function adicionar_projeto(req, res) {
 //     }
 // }
 
-function obterProjetoSelecionadoUsuario(email, callback) {
-    const sql = 'SELECT projeto_selecionado FROM usuarios WHERE email = ?';
-    const values = [email];
+function obterProjetosUsuario(req, res) {
+    // Verificar se o usuário está autenticado
+    if (req.session && req.session.usuario) {
+        const usuarioNome = req.session.usuario.nome;
+
+        // Consulta MySQL para obter os projetos do usuário
+        const sql = 'SELECT nome FROM projetos WHERE usuario_nome = ?';
+        const values = [usuarioNome];
+
+        conexao.query(sql, values, (err, results) => {
+            if (err) {
+                console.error('Erro ao executar consulta de projetos do usuário:', err);
+                res.status(500).json({ erro: 'Erro ao obter os projetos do usuário' });
+                return;
+            }
+
+            const projetosUsuario = results.map(result => result.nome);
+            res.json(projetosUsuario);
+        });
+    } else {
+        // Usuário não autenticado, responder com erro
+        res.status(401).json({ erro: 'Usuário não autenticado' });
+    }
+}
+
+// Função para adicionar uma nova lista de projetos
+function adicionarLista(req, res) {
+    const nomeLista = req.body.nome; // Obter o nome da lista do corpo da requisição
+    const usuarioNome = req.session.usuario.nome; // Obter o nome do usuário da sessão
+
+    // Verificar se o nome da lista não está vazio
+    if (!nomeLista) {
+        return res.status(400).json({ erro: 'O nome da lista não pode estar vazio' });
+    }
+
+    // Inserir os dados da nova lista na tabela de projetos
+    const sql = 'INSERT INTO projetos (nome, usuario_nome) VALUES (?, ?)';
+    const values = [nomeLista, usuarioNome];
 
     conexao.query(sql, values, (err, results) => {
         if (err) {
-            console.error('Erro ao executar consulta:', err);
-            callback(err, null);
-            return;
+            console.error('Erro ao adicionar lista de projetos:', err);
+            return res.status(500).json({ erro: 'Erro ao adicionar lista de projetos' });
         }
-        
-        if (results.length > 0) {
-            callback(null, results[0].projeto_selecionado);
-        } else {
-            callback(new Error('Usuário não encontrado'), null);
-        }
+
+        // Redirecionar o usuário de volta para a página principal após a inserção bem-sucedida
+        res.redirect('/pagina_principal');
     });
 }
+
+// Rota para selecionar um projeto
+function selecionar_projeto(req, res) {
+    const projetoSelecionado = req.body.projetoSelecionado;
+    
+    // Atualizar o campo 'projeto_selecionado' no banco de dados para o projeto selecionado
+    const sql = 'UPDATE usuarios SET projeto_selecionado = ? WHERE nome = ?';
+    const values = [projetoSelecionado, req.session.usuario.nome];
+
+    conexao.query(sql, values, (err, result) => {
+        if (err) {
+            console.error('Erro ao selecionar projeto:', err);
+            res.status(500).json({ erro: 'Erro ao selecionar projeto' });
+            return;
+        }
+        // Responder com sucesso
+        res.status(200).send('Projeto selecionado com sucesso');
+    });
+}
+
+
 
 // Exportar funções
 module.exports = {
@@ -214,6 +240,7 @@ module.exports = {
     pagina_principal,
     logout,
     login_usuario,
-    adicionar_projeto,
-    obterProjetoSelecionadoUsuario
+    obterProjetosUsuario,
+    adicionarLista,
+    selecionar_projeto
 };

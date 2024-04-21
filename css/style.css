@@ -25,6 +25,9 @@ main {
     height: 100vh; /* Define a altura para ocupar toda a altura da viewport */
 }
 
+.projeto:hover {
+    color: blue; /* Mude a cor de fundo ao passar o mouse sobre o item */
+}
 
 /* img {
     max-width: 100%;
