@@ -46,5 +46,9 @@ router.get('/listar_projetos', function(req,res) {
     servico.listarProjetos(req,res);
 });
 
+router.post('/atualizar_projeto_selecionado', function(req,res) {
+    servico.atualizarProjetoSelecionado(req,res);
+});
+
 // Exportar o router
 module.exports = router;

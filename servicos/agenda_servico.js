@@ -99,17 +99,32 @@ function login_usuario(req, res) {
         if (results.length > 0) {
             // Armazene o nome do usuário na sessão
             const nome = results[0].nome;
-            req.session.usuario = {
-                email: email,
-                nome: nome,
-                projeto_selecionado: 'Hoje'
-            };
-            res.render('pagina_principal', { session: req.session });
+            // Atualizar o projeto selecionado no banco de dados
+            const sqlUpdateProjetoSelecionado = 'UPDATE usuarios SET projeto_selecionado = ? WHERE email = ?';
+            const valuesUpdateProjetoSelecionado = ['Hoje', email];
+            conexao.query(sqlUpdateProjetoSelecionado, valuesUpdateProjetoSelecionado, (err, results) => {
+                if (err) {
+                    console.error('Erro ao atualizar projeto selecionado:', err);
+                    res.status(500).send('Erro ao atualizar projeto selecionado');
+                    return;
+                }
+                console.log('Projeto selecionado atualizado com sucesso');
+                // Armazenar informações do usuário na sessão
+                req.session.usuario = {
+                    email: email,
+                    nome: nome,
+                    projeto_selecionado: 'Hoje'
+                };
+                // Redirecionar para a página principal
+                res.render('pagina_principal', { session: req.session });
+            });
         } else {
             res.render('login', { erro: 'Credenciais inválidas. Por favor, tente novamente.' });
         }
     });
 }
+//res.redirect('/pagina_principal');
+//res.render('pagina_principal', { session: req.session });
 
 function adicionar_projeto(req, res) {
     const nome = req.body.nome;
@@ -164,6 +179,31 @@ function listarProjetos(req, res) {
 //     }
 // }
 
+function atualizarProjetoSelecionado(req, res) {
+    const novoProjetoSelecionado = req.body.projetoSelecionado;
+    const usuario = req.session.usuario;
+
+    if (!novoProjetoSelecionado || !usuario) {
+        return res.status(400).json({ erro: 'Parâmetros inválidos' });
+    }
+
+    // Atualize o projeto selecionado no banco de dados
+    const sql = 'UPDATE usuarios SET projeto_selecionado = ? WHERE email = ?';
+    const values = [novoProjetoSelecionado, usuario.email];
+
+    conexao.query(sql, values, (err, results) => {
+        if (err) {
+            console.error('Erro ao atualizar projeto selecionado:', err);
+            return res.status(500).json({ erro: 'Erro ao atualizar projeto selecionado' });
+        }
+
+        // Atualize o projeto selecionado na sessão do usuário
+        req.session.usuario.projeto_selecionado = novoProjetoSelecionado;
+        
+        res.json({ mensagem: 'Projeto selecionado atualizado com sucesso' });
+    });
+}
+
 // Exportar funções
 module.exports = {
     pagina_inicial,
@@ -174,5 +214,6 @@ module.exports = {
     logout,
     login_usuario,
     adicionar_projeto,
-    listarProjetos
+    listarProjetos,
+    atualizarProjetoSelecionado
 };

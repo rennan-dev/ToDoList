@@ -16,6 +16,57 @@
 
 <script>
     $(document).ready(function() {
+        // Função para carregar e exibir os projetos
+        function carregarProjetos() {
+            $.ajax({
+                type: "GET",
+                url: "/listar_projetos",
+                success: function(response) {
+                    if (response.projetos && response.projetos.length > 0) {
+                        // Limpar a lista de projetos
+                        $(".custom-list").empty();
+
+                        // Adicionar cada projeto à lista
+                        response.projetos.forEach(function(projeto) {
+                            $(".custom-list").append(`<li><a href="#" class="custom-link" data-projeto="${projeto.nome}">${projeto.nome}</a></li>`);
+                        });
+                    }
+                },
+                error: function(err) {
+                    console.error("Erro ao carregar projetos:", err);
+                }
+            });
+        }
+
+        // Chamar a função para carregar os projetos quando a página carregar
+        carregarProjetos();
+
+        // Ao clicar em um projeto na lista
+        $(".custom-list").on("click", ".custom-link", function(e) {
+            e.preventDefault();
+            var projetoSelecionado = $(this).data("projeto");
+
+            // Enviar solicitação AJAX para atualizar o projeto selecionado no banco de dados
+            $.ajax({
+                type: "POST",
+                url: "/atualizar_projeto_selecionado",
+                data: { projetoSelecionado: projetoSelecionado },
+                success: function(response) {
+                    // Verificar se a resposta contém uma mensagem de sucesso
+                    if (response.mensagem) {
+                        console.log(response.mensagem);
+                        // Atualizar a sessão do usuário com o novo projeto selecionado
+                        window.location.reload();
+                    } else {
+                        console.log("Erro ao atualizar projeto selecionado");
+                    }
+                },
+                error: function(err) {
+                    console.error("Erro ao atualizar projeto selecionado:", err);
+                }
+            });
+        });
+
         // Ao clicar no botão +Adicionar Projeto
         $("#addProjectBtn").click(function() {
             // Mostra o formulário do projeto
@@ -56,29 +107,5 @@
                 }
             });
         });
-        // Função para carregar e exibir os projetos
-    function carregarProjetos() {
-        $.ajax({
-            type: "GET",
-            url: "/listar_projetos",
-            success: function(response) {
-                if (response.projetos && response.projetos.length > 0) {
-                    // Limpar a lista de projetos
-                    $(".custom-list").empty();
-
-                    // Adicionar cada projeto à lista
-                    response.projetos.forEach(function(projeto) {
-                        $(".custom-list").append(`<li><a href="#" class="custom-link">${projeto.nome}</a></li>`);
-                    });
-                }
-            },
-            error: function(err) {
-                console.error("Erro ao carregar projetos:", err);
-            }
-        });
-    }
-
-    // Chamar a função para carregar os projetos quando a página carregar
-    carregarProjetos();
     });
 </script>
