@@ -229,6 +229,79 @@ function selecionar_projeto(req, res) {
     });
 }
 
+// Função para inserir uma nova tarefa no banco de dados
+function adicionarTarefa(req, res) {
+    const nomeTarefa = req.body.nomeDaTarefa;
+
+    if (!nomeTarefa) {
+        console.error('O nome da tarefa não pode ser nulo.');
+        return;
+    }
+
+    // Recuperar o nome do projeto selecionado do usuário
+    const userNome = req.session.usuario.nome;
+
+    console.log(userNome);
+
+    // Consulta SQL para obter o ID do projeto selecionado pelo usuário
+    const sql = 'SELECT projeto_selecionado FROM usuarios WHERE nome = ?';
+
+    // Executar a consulta SQL
+    conexao.query(sql, [userNome], (error, results, fields) => {
+        if (error) {
+            console.error('Erro ao buscar o projeto selecionado do usuário:', error);
+            return;
+        }
+
+        // Verificar se o projeto foi encontrado
+        if (results.length === 0 || !results[0].projeto_selecionado) {
+            console.error('Projeto selecionado não encontrado para o usuário.');
+            return;
+        }
+
+        // Nome do projeto selecionado
+        const nomeProjeto = results[0].projeto_selecionado;
+
+        // Consulta SQL para obter o ID do projeto
+        const sqlProjeto = 'SELECT id FROM projetos WHERE nome = ?';
+
+        // Executar a consulta SQL para obter o ID do projeto
+        conexao.query(sqlProjeto, [nomeProjeto], (error, results, fields) => {
+            if (error) {
+                console.error('Erro ao buscar o ID do projeto:', error);
+                return;
+            }
+
+            // Verificar se o projeto foi encontrado
+            if (results.length === 0) {
+                console.error('Projeto não encontrado.');
+                return;
+            }
+
+            // ID do projeto encontrado
+            const projetoId = results[0].id;
+
+            // Definir o status como 'to do'
+            const status = 'to do';
+
+            // Montar a consulta SQL para inserir a nova tarefa
+            const insertQuery = 'INSERT INTO tarefas (nome, status, projeto_id) VALUES (?, ?, ?)';
+
+            // Executar a consulta SQL para inserir a nova tarefa
+            conexao.query(insertQuery, [nomeTarefa, status, projetoId], (error, results, fields) => {
+                if (error) {
+                    console.error('Erro ao inserir a tarefa:', error);
+                    return;
+                }
+
+                console.log('Tarefa inserida com sucesso!');
+
+                res.redirect('/pagina_principal');
+            });
+        });
+    });
+}
+
 
 
 // Exportar funções
@@ -242,5 +315,6 @@ module.exports = {
     login_usuario,
     obterProjetosUsuario,
     adicionarLista,
-    selecionar_projeto
+    selecionar_projeto,
+    adicionarTarefa
 };

@@ -54,5 +54,9 @@ router.post('/selecionar_projeto', function(req, res) {
     servico.selecionar_projeto(req, res);
 });
 
+router.post('/adicionar_tarefa', function(req,res) {
+    servico.adicionarTarefa(req,res);
+});
+
 // Exportar o router
 module.exports = router;
