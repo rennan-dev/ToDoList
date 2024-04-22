@@ -326,9 +326,9 @@ function mostrarTarefasDoProjeto(req, res) {
         // Nome do projeto selecionado
         const nomeProjeto = results[0].projeto_selecionado;
 
-        // Consulta SQL para buscar todas as tarefas associadas ao projeto
+        // Consulta SQL para buscar todas as tarefas associadas ao projeto, incluindo o campo status
         const sqlTarefas = `
-            SELECT tarefas.nome 
+            SELECT tarefas.id, tarefas.nome, tarefas.status 
             FROM tarefas
             INNER JOIN projetos ON tarefas.projeto_id = projetos.id
             WHERE projetos.nome = ?
@@ -351,11 +351,16 @@ function mostrarTarefasDoProjeto(req, res) {
 function concluir_tarefas(req, res) {
     // Obter as tarefas marcadas como concluídas do corpo da requisição
     const tarefasConcluidas = JSON.parse(req.body.tarefasConcluidas);
-    
-    
-    console.log(req.body);
-    console.log(tarefasConcluidas);
 
+    console.log(tarefasConcluidas);
+    
+    // Verificar se existem tarefas a serem concluídas
+    if (tarefasConcluidas.length === 0) {
+        console.error('Nenhuma tarefa a ser concluída foi fornecida.');
+        res.status(400).send('Nenhuma tarefa a ser concluída foi fornecida.');
+        return;
+    }
+    
     // Atualizar o status das tarefas no banco de dados para 'done'
     const sql = 'UPDATE tarefas SET status = "done" WHERE nome IN (?)';
 
@@ -369,10 +374,12 @@ function concluir_tarefas(req, res) {
         }
 
         console.log('Status das tarefas atualizado com sucesso!');
-        // Responder à requisição com um status de sucesso
-        res.sendStatus(200);
+        
+        // Após a atualização bem-sucedida, redirecione para a página principal
+        res.redirect('/pagina_principal'); // Substitua '/pagina_principal' pela rota da sua página principal
     });
 }
+
 
 
 // Exportar funções

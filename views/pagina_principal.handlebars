@@ -29,33 +29,41 @@
     </section>
 
     <!-- Seção ocupando a parte central -->
-<main style="flex: 1; padding: 20px;">
-    <div class="d-flex align-items-center justify-content-center h-100 w-100"> 
-        <div class="card position-relative" style="height: 50%; width: 75%;">
-            <div class="card-body p-2">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-text mb-4">{{ projetoSelecionado }}</h5>
+    <main style="flex: 1; padding: 20px;">
+        <div class="d-flex align-items-center justify-content-center h-100 w-100"> 
+            <div class="card position-relative" style="height: 50%; width: 75%;">
+                <div class="card-body p-2">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-text mb-4">{{ projetoSelecionado }}</h5>
+                        </div>
+                        <div class="col-auto">
+                            <button id="addButton" type="button" class="btn btn-primary">Adicionar Tarefa</button>
+                        </div>
                     </div>
-                    <div class="col-auto">
-                        <button id="addButton" type="button" class="btn btn-primary">Adicionar Tarefa</button>
+                    <!-- Área para exibir as tarefas como checkboxes -->
+                    <div class="row">
+                        <div class="col">
+                            <h5>To do</h5>
+                            <div id="toDoTasks">
+                                <!-- Aqui serão exibidas as tarefas 'To do' -->
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h5>Done</h5>
+                            <div id="doneTasks">
+                                <!-- Aqui serão exibidas as tarefas 'Done' -->
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <!-- Área para exibir as tarefas como checkboxes -->
-                <div id="listaTarefas">
-                    <!-- Aqui serão exibidas as tarefas dinamicamente como checkboxes -->
-                </div>
-                <!-- Botão 'Tarefa Concluída' -->
-                <div class="position-absolute bottom-0 end-0" style="margin: 5px;">
-                    <button id="concluirTarefaButton" type="button" class="btn btn-success" disabled>Tarefa Concluída</button>
+                    <!-- Botão 'Tarefa Concluída' -->
+                    <div class="position-absolute bottom-0 end-0" style="margin: 5px;">
+                        <button id="concluirTarefaButton" type="button" class="btn btn-success" disabled>Tarefa Concluída</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</main>
-
-
-
+    </main>
 
 </div>
 
@@ -99,16 +107,15 @@
     $(document).ready(function() {
 
         $(document).on('change', 'input[type="checkbox"]', function() {
-        // Verificar se pelo menos uma checkbox está marcada
-        if ($('input[type="checkbox"]:checked').length > 0) {
-            // Se sim, habilitar o botão 'Tarefa Concluída'
-            $('#concluirTarefaButton').prop('disabled', false);
-        } else {
-            // Se não, desabilitar o botão 'Tarefa Concluída'
-            $('#concluirTarefaButton').prop('disabled', true);
-        }
-    });
-
+            // Verificar se pelo menos uma checkbox está marcada
+            if ($('input[type="checkbox"]:checked').length > 0) {
+                // Se sim, habilitar o botão 'Tarefa Concluída'
+                $('#concluirTarefaButton').prop('disabled', false);
+            } else {
+                // Se não, desabilitar o botão 'Tarefa Concluída'
+                $('#concluirTarefaButton').prop('disabled', true);
+            }
+        });
 
         // Fazer requisição AJAX para buscar os projetos do usuário
         $.ajax({
@@ -148,40 +155,47 @@
         });
 
         // Fazer requisição AJAX para buscar e mostrar as tarefas do projeto selecionado
-        $.ajax({
-        url: '/mostrar_tarefas',
-        method: 'GET',
-        success: function(response) {
-            // Limpar a área de lista de tarefas
-            $('#listaTarefas').empty();
+$.ajax({
+    url: '/mostrar_tarefas',
+    method: 'GET',
+    success: function(response) {
+        // Limpar a área de lista de tarefas
+        $('#toDoTasks').empty();
+        $('#doneTasks').empty();
 
-            // Iterar sobre as tarefas retornadas e renderizá-las como checkboxes
-response.forEach(function(tarefa) {
-    $('#listaTarefas').append('<div><input type="checkbox" id="tarefa_' + tarefa.id + '" name="tarefa_' + tarefa.id + '" value="' + tarefa.nome + '"><label for="tarefa_' + tarefa.id + '">' + tarefa.nome + '</label></div>');
+        // Iterar sobre as tarefas retornadas e renderizá-las como checkboxes
+        response.forEach(function(tarefa) {
+            console.log(tarefa.status);
+            // Verificar o status da tarefa e renderizá-la na seção correspondente
+            if (tarefa.status === 'to do') {
+                $('#toDoTasks').append('<div><input type="checkbox" id="tarefa_' + tarefa.id + '" name="tarefa_' + tarefa.id + '" value="' + tarefa.nome + '"><label for="tarefa_' + tarefa.id + '">' + tarefa.nome + '</label></div>');
+            } else if (tarefa.status === 'done') {
+                $('#doneTasks').append('<div><label>' + tarefa.nome + '</label></div>');
+
+            }
+        });
+    },
+    error: function(xhr, status, error) {
+        console.error('Erro ao buscar tarefas do projeto:', error);
+    }
 });
 
-        },
-        error: function(xhr, status, error) {
-            console.error('Erro ao buscar tarefas do projeto:', error);
-        }
-    });
 
-    $('#concluirTarefaButton').click(function() {
+        $('#concluirTarefaButton').click(function() {
     // Obter todas as caixas de seleção marcadas
-    var tarefasConcluidas = [];
-    $('#listaTarefas input[type="checkbox"]:checked').each(function() {
-    tarefasConcluidas.push($(this).val());
-    console.log($(this).val()); // Adicione esta linha para imprimir o valor de cada checkbox selecionada
-});
+    // Obter todas as caixas de seleção marcadas dentro das listas de tarefas To Do e Done
+var tarefasConcluidas = $('#toDoTasks input[type="checkbox"]:checked, #doneTasks input[type="checkbox"]:checked').map(function() {
+    return $(this).val();
+}).get();
 
 
     // Enviar uma solicitação AJAX para a rota '/concluir_tarefas' com as tarefas marcadas como concluídas
-    $.ajax({    
+    $.ajax({
         url: '/concluir_tarefas',
         method: 'POST',
         data: { tarefasConcluidas: JSON.stringify(tarefasConcluidas) }, // Alterado para enviar diretamente os IDs das tarefas
         success: function(response) {
-            // Atualizar a página ou realizar outras ações após a conclusão bem-sucedida
+            window.location.reload();
         },
         error: function(xhr, status, error) {
             // Tratar erros de requisição, se necessário
@@ -190,6 +204,6 @@ response.forEach(function(tarefa) {
     });
 });
 
-        
+
     });
 </script>
