@@ -302,6 +302,77 @@ function adicionarTarefa(req, res) {
     });
 }
 
+function mostrarTarefasDoProjeto(req, res) {
+    const userNome = req.session.usuario.nome;
+
+    // Consulta SQL para obter o nome do projeto selecionado pelo usuário
+    const sqlProjeto = 'SELECT projeto_selecionado FROM usuarios WHERE nome = ?';
+
+    // Executar a consulta SQL para obter o nome do projeto selecionado
+    conexao.query(sqlProjeto, [userNome], (error, results, fields) => {
+        if (error) {
+            console.error('Erro ao buscar o projeto selecionado do usuário:', error);
+            res.status(500).send('Erro ao buscar o projeto selecionado do usuário');
+            return;
+        }
+
+        // Verificar se o projeto foi encontrado
+        if (results.length === 0 || !results[0].projeto_selecionado) {
+            console.error('Projeto selecionado não encontrado para o usuário:', userNome);
+            res.status(404).send('Projeto selecionado não encontrado para o usuário');
+            return;
+        }
+
+        // Nome do projeto selecionado
+        const nomeProjeto = results[0].projeto_selecionado;
+
+        // Consulta SQL para buscar todas as tarefas associadas ao projeto
+        const sqlTarefas = `
+            SELECT tarefas.nome 
+            FROM tarefas
+            INNER JOIN projetos ON tarefas.projeto_id = projetos.id
+            WHERE projetos.nome = ?
+        `;
+
+        // Executar a consulta SQL para buscar as tarefas do projeto
+        conexao.query(sqlTarefas, [nomeProjeto], (error, results, fields) => {
+            if (error) {
+                console.error('Erro ao buscar as tarefas do projeto:', error);
+                res.status(500).send('Erro ao buscar as tarefas do projeto');
+                return;
+            }
+
+            // Enviar as tarefas encontradas como resposta
+            res.json(results);
+        });
+    });
+}
+
+function concluir_tarefas(req, res) {
+    // Obter as tarefas marcadas como concluídas do corpo da requisição
+    const tarefasConcluidas = JSON.parse(req.body.tarefasConcluidas);
+    
+    
+    console.log(req.body);
+    console.log(tarefasConcluidas);
+
+    // Atualizar o status das tarefas no banco de dados para 'done'
+    const sql = 'UPDATE tarefas SET status = "done" WHERE nome IN (?)';
+
+    // Executar a consulta SQL para atualizar o status das tarefas
+    conexao.query(sql, [tarefasConcluidas], (error, results, fields) => {
+        if (error) {
+            console.error('Erro ao atualizar o status das tarefas:', error);
+            // Responder à requisição com um status de erro
+            res.sendStatus(500); // Ou outro código de status de erro adequado
+            return;
+        }
+
+        console.log('Status das tarefas atualizado com sucesso!');
+        // Responder à requisição com um status de sucesso
+        res.sendStatus(200);
+    });
+}
 
 
 // Exportar funções
@@ -316,5 +387,7 @@ module.exports = {
     obterProjetosUsuario,
     adicionarLista,
     selecionar_projeto,
-    adicionarTarefa
+    adicionarTarefa,
+    mostrarTarefasDoProjeto,
+    concluir_tarefas
 };

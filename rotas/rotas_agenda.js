@@ -58,5 +58,13 @@ router.post('/adicionar_tarefa', function(req,res) {
     servico.adicionarTarefa(req,res);
 });
 
+router.get('/mostrar_tarefas', function(req, res) {
+    servico.mostrarTarefasDoProjeto(req, res);
+});
+
+router.post('/concluir_tarefas', function(req,res) {
+    servico.concluir_tarefas(req,res);
+});
+
 // Exportar o router
 module.exports = router;
