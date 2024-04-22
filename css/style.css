@@ -103,3 +103,12 @@ main {
   }
   
 /*modal end*/
+
+
+.apagar-li:hover {
+    color: blue;
+}
+
+#toDoTasks, #doneTasks {
+    margin-left: 5px;
+}
