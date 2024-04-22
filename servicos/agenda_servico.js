@@ -368,6 +368,35 @@ function concluir_tarefas(req, res) {
     });
 }
 
+// Função para apagar uma tarefa do banco de dados
+function apagarTarefa(req, res) {
+    const nomeTarefa = req.body.nomeTarefa;
+    const userNome = req.session.usuario.nome; // Obter o nome do usuário logado
+
+    // Consulta SQL para apagar a tarefa com base no nome e no ID do usuário
+    const sql = `
+        DELETE FROM tarefas
+        WHERE nome = ? AND projeto_id IN (
+            SELECT id
+            FROM projetos
+            WHERE usuario_nome = ?
+        )
+    `;
+
+    // Executar a consulta SQL para apagar a tarefa
+    conexao.query(sql, [nomeTarefa, userNome], (error, results, fields) => {
+        if (error) {
+            console.error('Erro ao apagar a tarefa:', error);
+            res.status(500).send('Erro ao apagar a tarefa');
+            return;
+        }
+
+        console.log('Tarefa apagada com sucesso!');
+        res.sendStatus(200); // Ou outro código de status adequado
+    });
+}
+
+
 
 
 // Exportar funções
@@ -384,5 +413,6 @@ module.exports = {
     selecionar_projeto,
     adicionarTarefa,
     mostrarTarefasDoProjeto,
-    concluir_tarefas
+    concluir_tarefas,
+    apagarTarefa
 };

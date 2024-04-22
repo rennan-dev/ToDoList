@@ -66,5 +66,9 @@ router.post('/concluir_tarefas', function(req,res) {
     servico.concluir_tarefas(req,res);
 });
 
+router.post('/apagar_tarefa', function(req,res) {
+    servico.apagarTarefa(req,res);
+});
+
 // Exportar o router
 module.exports = router;

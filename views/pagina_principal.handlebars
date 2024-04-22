@@ -56,8 +56,9 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Botão 'Tarefa Concluída' -->
+                    
                     <div class="position-absolute bottom-0 end-0" style="margin: 5px;">
+                        <button id="apagarTarefaButton" type="button" class="btn btn-danger">Apagar uma Tarefa</button>
                         <button id="concluirTarefaButton" type="button" class="btn btn-success" disabled>Tarefa Concluída</button>
                     </div>
                 </div>
@@ -67,7 +68,7 @@
 
 </div>
 
-<!-- Modal -->
+<!-- Modal para adicionar uma tarefa-->
 <div id="modal" class="modal">
     <div class="modal-content" style="width: 20%; align-items: center;">
         <h2>Adicionar Tarefa</h2><br>
@@ -79,6 +80,18 @@
         </form>
     </div>
 </div>
+
+<!-- Modal para listar as tarefas a serem apagadas -->
+<div id="modalApagarTarefa" class="modal">
+    <div class="modal-content" style="width:30%; align-items: center;">
+        <h5>Clique em uma tarefa para apaga-lá</h5><br>
+        <ul id="listaTarefasApagar" style="list-style: none;">
+            
+        </ul>
+        <button class="btn btn-danger close" id="cancelButton" type="button" style="width: 25%;">Cancelar</button>
+    </div>
+</div>
+
 
 {{>footer}}
 
@@ -203,6 +216,58 @@ var tarefasConcluidas = $('#toDoTasks input[type="checkbox"]:checked, #doneTasks
         }
     });
 });
+
+
+    /**********************************************APAGAR TAREFA***********************************************/
+    // Adicionar evento de clique ao botão "Apagar uma Tarefa"
+// Adicionar evento de clique ao botão "Apagar uma Tarefa"
+$('#apagarTarefaButton').click(function() {
+    // Limpar a lista de tarefas do modal
+    $('#listaTarefasApagar').empty();
+
+    // Adicionar as tarefas 'to do' ao modal
+    $('#toDoTasks input[type="checkbox"]').each(function() {
+        var nomeTarefa = $(this).val();
+        $('#listaTarefasApagar').append('<li>' + nomeTarefa + '</li>');
+    });
+
+    // Adicionar as tarefas 'done' ao modal
+    $('#doneTasks label').each(function() {
+        var nomeTarefa = $(this).text();
+        $('#listaTarefasApagar').append('<li>' + nomeTarefa + '</li>');
+    });
+
+    // Exibir o modal
+    $('#modalApagarTarefa').css('display', 'block');
+});
+
+
+// Adicionar evento de clique ao botão de fechar do modal
+$('.close').click(function() {
+    $('#modalApagarTarefa').css('display', 'none');
+});
+
+// Adicionar evento de clique aos elementos da lista de tarefas
+$('#listaTarefasApagar').on('click', 'li', function() {
+    // Obter o nome da tarefa selecionada
+    var nomeTarefa = $(this).text();
+
+    // Enviar uma solicitação AJAX para apagar a tarefa
+    $.ajax({
+        url: '/apagar_tarefa',
+        method: 'POST',
+        data: { nomeTarefa: nomeTarefa },
+        success: function(response) {
+            // Se a tarefa foi apagada com sucesso, recarregue a página ou atualize a lista de tarefas
+            location.reload(); // Você pode ajustar isso conforme necessário
+        },
+        error: function(xhr, status, error) {
+            // Tratar erros de requisição, se necessário
+            console.error('Erro ao apagar a tarefa:', error);
+        }
+    });
+});
+
 
 
     });
