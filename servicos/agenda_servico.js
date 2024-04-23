@@ -1,10 +1,6 @@
 // Importar o módulo de conexão com banco MySQL
 const conexao = require('../banco_de_dados/conexao');
 
-function pagina_inicial(req, res){
-    res.render('pagina_inicial');
-}
-
 function pagina_login(req, res){
     res.render('login');
 }
@@ -232,55 +228,68 @@ function selecionar_projeto(req, res) {
 // Função para inserir uma nova tarefa no banco de dados
 function adicionarTarefa(req, res) {
     const nomeTarefa = req.body.nomeDaTarefa;
+    const userNome = req.session.usuario.nome;
 
     if (!nomeTarefa) {
         console.error('O nome da tarefa não pode ser nulo.');
         return;
     }
 
-    // Recuperar o nome do usuário logado
-    const userNome = req.session.usuario.nome;
+    // Consulta SQL para obter o nome do projeto selecionado pelo usuário
+    const sqlProjetoSelecionado = 'SELECT projeto_selecionado FROM usuarios WHERE nome = ?';
 
-    // Consulta SQL para obter o ID do projeto do usuário logado
-    const sqlProjetoId = `
-        SELECT projetos.id
-        FROM projetos
-        INNER JOIN usuarios ON projetos.usuario_nome = usuarios.nome
-        WHERE usuarios.nome = ?;
-    `;
-
-    // Executar a consulta SQL para obter o ID do projeto do usuário logado
-    conexao.query(sqlProjetoId, [userNome], (error, results, fields) => {
+    // Executar a consulta SQL para obter o nome do projeto selecionado pelo usuário
+    conexao.query(sqlProjetoSelecionado, [userNome], (error, results, fields) => {
         if (error) {
-            console.error('Erro ao buscar o ID do projeto do usuário:', error);
+            console.error('Erro ao buscar o projeto selecionado do usuário:', error);
             return;
         }
 
         // Verificar se o projeto foi encontrado
-        if (results.length === 0) {
-            console.error('Projeto não encontrado para o usuário:', userNome);
+        if (results.length === 0 || !results[0].projeto_selecionado) {
+            console.error('Projeto selecionado não encontrado para o usuário:', userNome);
             return;
         }
 
-        // ID do projeto do usuário logado
-        const projetoId = results[0].id;
+        // Nome do projeto selecionado
+        const projetoSelecionado = results[0].projeto_selecionado;
 
-        // Definir o status como 'to do'
-        const status = 'to do';
+        // Consulta SQL para obter o ID do projeto selecionado pelo usuário
+        const sqlProjetoId = 'SELECT id FROM projetos WHERE nome = ?';
 
-        // Montar a consulta SQL para inserir a nova tarefa
-        const insertQuery = 'INSERT INTO tarefas (nome, status, projeto_id) VALUES (?, ?, ?)';
-
-        // Executar a consulta SQL para inserir a nova tarefa
-        conexao.query(insertQuery, [nomeTarefa, status, projetoId], (error, results, fields) => {
+        // Executar a consulta SQL para obter o ID do projeto selecionado pelo usuário
+        conexao.query(sqlProjetoId, [projetoSelecionado], (error, results, fields) => {
             if (error) {
-                console.error('Erro ao inserir a tarefa:', error);
+                console.error('Erro ao buscar o ID do projeto selecionado:', error);
                 return;
             }
 
-            console.log('Tarefa inserida com sucesso!');
+            // Verificar se o projeto foi encontrado
+            if (results.length === 0) {
+                console.error('Projeto não encontrado:', projetoSelecionado);
+                return;
+            }
 
-            res.redirect('/pagina_principal');
+            // ID do projeto selecionado
+            const projetoId = results[0].id;
+
+            // Definir o status como 'to do'
+            const status = 'to do';
+
+            // Montar a consulta SQL para inserir a nova tarefa
+            const insertQuery = 'INSERT INTO tarefas (nome, status, projeto_id) VALUES (?, ?, ?)';
+
+            // Executar a consulta SQL para inserir a nova tarefa
+            conexao.query(insertQuery, [nomeTarefa, status, projetoId], (error, results, fields) => {
+                if (error) {
+                    console.error('Erro ao inserir a tarefa:', error);
+                    return;
+                }
+
+                console.log('Tarefa inserida com sucesso!');
+
+                res.redirect('/pagina_principal');
+            });
         });
     });
 }
@@ -393,7 +402,7 @@ function apagarTarefa(req, res) {
         }
 
         console.log('Tarefa apagada com sucesso!');
-        res.sendStatus(200); // Ou outro código de status adequado
+        res.sendStatus(200);
     });
 }
 
@@ -402,7 +411,6 @@ function apagarTarefa(req, res) {
 
 // Exportar funções
 module.exports = {
-    pagina_inicial,
     pagina_login,
     pagina_cadastro,
     cadastrar_novo_usuario, 
