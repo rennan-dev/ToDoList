@@ -19,20 +19,15 @@ body {
 }
 
 main {
-    display: flex; /* Torna o <main> um contêiner flexível */
-    justify-content: center; /* Alinha o conteúdo horizontalmente no centro */
-    align-items: center; /* Alinha o conteúdo verticalmente no centro */
-    height: 100vh; /* Define a altura para ocupar toda a altura da viewport */
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    height: 100vh; 
 }
 
 .projeto:hover {
-    color: blue; /* Mude a cor de fundo ao passar o mouse sobre o item */
+    color: blue; 
 }
-
-/* img {
-    max-width: 100%;
-    height: auto; 
-} */
 
 /*menu start*/
 .navbar-custom {
@@ -40,13 +35,13 @@ main {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 1000; /* Garante que o menu fique acima do conteúdo */
-    background-color: #000000; /* Cor preta */
+    z-index: 1000;
+    background-color: #000000; 
 }
 
 .navbar-brand {
-    display: block; /* Exibir como um bloco */
-    text-align: center; /* Centralizar o texto */
+    display: block; 
+    text-align: center; 
 }
 
 .navbar-brand span {
@@ -54,10 +49,10 @@ main {
 }
 
 .navbar-brand span {
-    font-size: 2em; /* Tamanho da fonte */
-    font-family: 'medieval'; /* Fonte */
-    color: #ffffff; /* Cor do texto */
-    margin: 5px 0; /* Margem entre os spans */
+    font-size: 2em; 
+    font-family: 'medieval'; 
+    color: #ffffff; 
+    margin: 5px 0; 
 }
 /*menu end*/
 
@@ -65,7 +60,6 @@ main {
 
 
 /*modal start*/
-/* Modal */
 .modal {
     display: none;
     position: fixed;
@@ -75,10 +69,10 @@ main {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.5); /* fundo escuro */
+    background-color: rgba(0, 0, 0, 0.5); 
   }
   
-  /* Conteúdo do modal */
+  
   .modal-content {
     background-color: #fefefe;
     margin: 15% auto;
@@ -87,7 +81,7 @@ main {
     width: 40%;
   }
   
-  /* Botão fechar */
+  
   .close-button {
     color: #aaa;
     float: right;

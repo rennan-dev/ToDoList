@@ -7,8 +7,6 @@ const router = express.Router();
 // Importar módulo de serviços
 const servico = require('../servicos/agenda_servico');
 
-// *** ADICIONE SUAS ROTAS AQUI
-
 //rota principal
 router.get('/', function(req, res){
     servico.pagina_principal(req,res);

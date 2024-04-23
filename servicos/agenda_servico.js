@@ -25,7 +25,7 @@ function cadastrar_novo_usuario(req, res) {
         return res.render('cadastro', { erro: 'Senha e Confirmar senha precisam estar iguais.' });
     }
 
-    // Consulta SQL para verificar se o nome de usuário ou o email já existem no banco de dados
+    //consulta SQL para verificar se o nome de usuário ou o email já existem no banco de dados
     const sqlVerificarExistencia = "SELECT * FROM usuarios WHERE nome = ? OR email = ?";
     const valuesExistencia = [nome, email];
 
@@ -35,13 +35,13 @@ function cadastrar_novo_usuario(req, res) {
             return res.render('cadastro', { erro: 'Erro ao criar conta.' });
         }
 
-        // Se já existe um usuário com o mesmo nome ou email, retornar mensagem de erro
+        //se já existe um usuário com o mesmo nome ou email, retornar mensagem de erro
         if (result.length > 0) {
             console.log('Nome de usuário ou email já existem no banco de dados');
             return res.render('cadastro', { erro: 'Nome de usuário ou email já cadastrados.' });
         }
 
-        // Se não existir usuário com o mesmo nome ou email, proceder com a inserção
+        //se não existir usuário com o mesmo nome ou email, proceder com a inserção
         const sqlInsertUsuario = "INSERT INTO usuarios (nome, email, senha, projeto_selecionado) VALUES (?, ?, ?, ?)";
         const valuesUsuario = [nome, email, senha, 'Hoje'];
 
@@ -51,7 +51,7 @@ function cadastrar_novo_usuario(req, res) {
                 return res.render('cadastro', { erro: 'Erro ao criar conta.' });
             }
 
-            // Criação do projeto 'Hoje' para o novo usuário
+            //criação do projeto 'Hoje' para o novo usuário
             const sqlInsertProjeto = "INSERT INTO projetos (nome, usuario_nome) VALUES (?, ?)";
             const valuesProjeto = ['Hoje', nome];
 
@@ -75,11 +75,11 @@ function cadastrar_novo_usuario(req, res) {
 }
 
 function pagina_principal(req, res){
-    // Verificar se o usuário está autenticado
+    //verificar se o usuário está autenticado
     if (req.session && req.session.usuario) {
         const emailUsuario = req.session.usuario.email;
 
-        // Consulta MySQL para obter o projeto selecionado do usuário
+        //consulta MySQL para obter o projeto selecionado do usuário
         const sql = 'SELECT projeto_selecionado FROM usuarios WHERE email = ?';
         const values = [emailUsuario];
 
@@ -91,30 +91,27 @@ function pagina_principal(req, res){
             }
 
             if (results.length > 0) {
-                // Projeto selecionado encontrado
+                //projeto selecionado encontrado
                 const projetoSelecionado = results[0].projeto_selecionado;
-                // Renderiza a página principal com os dados do usuário e o projeto selecionado
                 res.render('pagina_principal', { usuario: req.session.usuario, projetoSelecionado: projetoSelecionado });
             } else {
-                // Projeto selecionado não encontrado
                 res.status(404).send('Projeto selecionado não encontrado para o usuário');
             }
         });
     } else {
-        // Usuário não autenticado, redireciona para a página de login
+        //usuário não autenticado, redireciona para a página de login
         res.redirect('/login');
     }
 }
 
 function logout(req, res) {
-    // Destrua a sessão
+    //destrua a sessão
     req.session.destroy(function(err) {
         if (err) {
             console.error('Erro ao encerrar a sessão:', err);
             res.status(500).send('Erro ao encerrar a sessão');
         } else {
-            // Redirecione para a página de login ou para a página inicial
-            res.redirect('/login'); // ou qualquer outra página que você deseja redirecionar após sair
+            res.redirect('/login'); 
         }
     });
 }
@@ -134,9 +131,9 @@ function login_usuario(req, res) {
         }
 
         if (results.length > 0) {
-            // Armazene o nome do usuário na sessão
+            //armazene o nome do usuário na sessão
             const nome = results[0].nome;
-            // Atualizar o projeto selecionado no banco de dados
+            //atualizar o projeto selecionado no banco de dados
             const sqlUpdateProjetoSelecionado = 'UPDATE usuarios SET projeto_selecionado = ? WHERE email = ?';
             const valuesUpdateProjetoSelecionado = ['Hoje', email];
             conexao.query(sqlUpdateProjetoSelecionado, valuesUpdateProjetoSelecionado, (err, results) => {
@@ -146,12 +143,12 @@ function login_usuario(req, res) {
                     return;
                 }
                 console.log('Projeto selecionado atualizado com sucesso');
-                // Armazenar informações do usuário na sessão
+                //armazenar informações do usuário na sessão
                 req.session.usuario = {
                     email: email,
                     nome: nome
                 };
-                // Redirecionar para a página principal
+                //redirecionar para a página principal
                 res.redirect('/pagina_principal');
             });
         } else {
@@ -161,11 +158,11 @@ function login_usuario(req, res) {
 }
 
 function obterProjetosUsuario(req, res) {
-    // Verificar se o usuário está autenticado
+    //verificar se o usuário está autenticado
     if (req.session && req.session.usuario) {
         const usuarioNome = req.session.usuario.nome;
 
-        // Consulta MySQL para obter os projetos do usuário
+        //consulta MySQL para obter os projetos do usuário
         const sql = 'SELECT nome FROM projetos WHERE usuario_nome = ?';
         const values = [usuarioNome];
 
@@ -180,22 +177,22 @@ function obterProjetosUsuario(req, res) {
             res.json(projetosUsuario);
         });
     } else {
-        // Usuário não autenticado, responder com erro
+        //usuário não autenticado, responder com erro
         res.status(401).json({ erro: 'Usuário não autenticado' });
     }
 }
 
-// Função para adicionar uma nova lista de projetos
+//função para adicionar uma nova lista de projetos
 function adicionarLista(req, res) {
-    const nomeLista = req.body.nome; // Obter o nome da lista do corpo da requisição
-    const usuarioNome = req.session.usuario.nome; // Obter o nome do usuário da sessão
+    const nomeLista = req.body.nome; 
+    const usuarioNome = req.session.usuario.nome; 
 
-    // Verificar se o nome da lista não está vazio
+    //verificar se o nome da lista não está vazio
     if (!nomeLista) {
         return res.status(400).send('<script>alert("A lista não pode ser enviada vazia"); window.location.href = "/pagina_principal";</script>');
     }
 
-    // Consulta SQL para verificar se o usuário já possui um projeto com o mesmo nome
+    //consulta SQL para verificar se o usuário já possui um projeto com o mesmo nome
     const sqlVerificarProjeto = 'SELECT * FROM projetos WHERE nome = ? AND usuario_nome = ?';
     const valuesVerificarProjeto = [nomeLista, usuarioNome];
 
@@ -205,12 +202,12 @@ function adicionarLista(req, res) {
             return res.status(500).send('<script>alert("Erro ao verificar projeto"); window.location.href = "/pagina_principal";</script>');
         }
 
-        // Se já existir um projeto com o mesmo nome para o usuário, enviar mensagem de erro
+        //se já existir um projeto com o mesmo nome para o usuário, enviar mensagem de erro
         if (results.length > 0) {
             return res.status(400).send('<script>alert("Já existe uma lista com esse nome"); window.location.href = "/pagina_principal";</script>');
         }
 
-        // Inserir os dados da nova lista na tabela de projetos
+        //inserir os dados da nova lista na tabela de projetos
         const sql = 'INSERT INTO projetos (nome, usuario_nome) VALUES (?, ?)';
         const values = [nomeLista, usuarioNome];
 
@@ -220,18 +217,18 @@ function adicionarLista(req, res) {
                 return res.status(500).send('<script>alert("Erro ao adicionar lista de projetos"); window.location.href = "/pagina_principal";</script>');
             }
 
-            // Redirecionar o usuário de volta para a página principal após a inserção bem-sucedida
+            //redirecionar o usuário de volta para a página principal após a inserção bem-sucedida
             return res.redirect('/pagina_principal');
         });
     });
 }
 
 
-// Rota para selecionar um projeto
+//rota para selecionar um projeto
 function selecionar_projeto(req, res) {
     const projetoSelecionado = req.body.projetoSelecionado;
     
-    // Atualizar o campo 'projeto_selecionado' no banco de dados para o projeto selecionado
+    //atualizar o campo 'projeto_selecionado' no banco de dados para o projeto selecionado
     const sql = 'UPDATE usuarios SET projeto_selecionado = ? WHERE nome = ?';
     const values = [projetoSelecionado, req.session.usuario.nome];
 
@@ -241,73 +238,71 @@ function selecionar_projeto(req, res) {
             res.status(500).json({ erro: 'Erro ao selecionar projeto' });
             return;
         }
-        // Responder com sucesso
         res.status(200).send('Projeto selecionado com sucesso');
     });
 }
 
-// Função para inserir uma nova tarefa no banco de dados
+//função para inserir uma nova tarefa no banco de dados
 function adicionarTarefa(req, res) {
     const nomeTarefa = req.body.nomeDaTarefa;
     const userNome = req.session.usuario.nome;
 
     if (!nomeTarefa) {
-        // Mensagem de erro para nome da tarefa vazio
         return res.status(400).send('<script>alert("O nome da tarefa não pode ser nulo."); window.location.href = "/pagina_principal";</script>');
     }
 
-    // Consulta SQL para obter o nome do projeto selecionado pelo usuário
+    //consulta SQL para obter o nome do projeto selecionado pelo usuário
     const sqlProjetoSelecionado = 'SELECT projeto_selecionado FROM usuarios WHERE nome = ?';
 
-    // Executar a consulta SQL para obter o nome do projeto selecionado pelo usuário
+    //executar a consulta SQL para obter o nome do projeto selecionado pelo usuário
     conexao.query(sqlProjetoSelecionado, [userNome], (error, results, fields) => {
         if (error) {
-            // Mensagem de erro ao buscar o projeto selecionado do usuário
+            //mensagem de erro ao buscar o projeto selecionado do usuário
             return res.status(500).send(`<script>alert("Erro ao buscar o projeto selecionado do usuário: ${error.message}"); window.location.href = "/pagina_principal";</script>`);
         }
 
-        // Verificar se o projeto foi encontrado
+        //verificar se o projeto foi encontrado
         if (results.length === 0 || !results[0].projeto_selecionado) {
-            // Mensagem de erro se o projeto selecionado não foi encontrado
+            //mensagem de erro se o projeto selecionado não foi encontrado
             return res.status(404).send('<script>alert("Projeto selecionado não encontrado para o usuário."); window.location.href = "/pagina_principal";</script>');
         }
 
-        // Nome do projeto selecionado
+        //nome do projeto selecionado
         const projetoSelecionado = results[0].projeto_selecionado;
 
-        // Consulta SQL para obter o ID do projeto selecionado pelo usuário
+        //consulta SQL para obter o ID do projeto selecionado pelo usuário
         const sqlProjetoId = 'SELECT id FROM projetos WHERE nome = ? AND usuario_nome = ?';
 
-        // Executar a consulta SQL para obter o ID do projeto selecionado pelo usuário
+        //executar a consulta SQL para obter o ID do projeto selecionado pelo usuário
         conexao.query(sqlProjetoId, [projetoSelecionado, userNome], (error, results, fields) => {
             if (error) {
-                // Mensagem de erro ao buscar o ID do projeto selecionado
+                //mensagem de erro ao buscar o ID do projeto selecionado
                 return res.status(500).send(`<script>alert("Erro ao buscar o ID do projeto selecionado: ${error.message}"); window.location.href = "/pagina_principal";</script>`);
             }
 
-            // Verificar se o projeto foi encontrado
+            //verificar se o projeto foi encontrado
             if (results.length === 0) {
-                // Mensagem de erro se o projeto não foi encontrado
+                //mensagem de erro se o projeto não foi encontrado
                 return res.status(404).send('<script>alert("Projeto não encontrado."); window.location.href = "/pagina_principal";</script>');
             }
 
-            // ID do projeto selecionado
+            //ID do projeto selecionado
             const projetoId = results[0].id;
 
-            // Definir o status como 'to do'
+            //definir o status como 'to do'
             const status = 'to do';
 
-            // Montar a consulta SQL para inserir a nova tarefa
+            //montar a consulta SQL para inserir a nova tarefa
             const insertQuery = 'INSERT INTO tarefas (nome, status, projeto_id) VALUES (?, ?, ?)';
 
-            // Executar a consulta SQL para inserir a nova tarefa
+            //executar a consulta SQL para inserir a nova tarefa
             conexao.query(insertQuery, [nomeTarefa, status, projetoId], (error, results, fields) => {
                 if (error) {
-                    // Mensagem de erro ao inserir a tarefa
+                    //mensagem de erro ao inserir a tarefa
                     return res.status(500).send(`<script>alert("Erro ao inserir a tarefa: ${error.message}"); window.location.href = "/pagina_principal";</script>`);
                 }
 
-                // Mensagem de sucesso ao inserir a tarefa
+                //mensagem de sucesso ao inserir a tarefa
                 return res.status(200).send('<script>alert("Tarefa inserida com sucesso!"); window.location.href = "/pagina_principal";</script>');
             });
         });
@@ -318,93 +313,91 @@ function adicionarTarefa(req, res) {
 function mostrarTarefasDoProjeto(req, res) {
     const userNome = req.session.usuario.nome;
 
-    // Consulta SQL para obter o ID do projeto do usuário logado
+    //consulta SQL para obter o ID do projeto do usuário logado
     const sqlProjetoSelecionado = `
     SELECT projeto_selecionado
     FROM usuarios
     WHERE nome = ?;
 `;
 
-// Executar a consulta SQL para obter o projeto selecionado pelo usuário
-conexao.query(sqlProjetoSelecionado, [userNome], (error, results, fields) => {
-    if (error) {
-        console.error('Erro ao buscar o projeto selecionado do usuário:', error);
-        res.status(500).send('Erro ao buscar o projeto selecionado do usuário');
-        return;
-    }
-
-    // Verificar se o projeto foi encontrado
-    if (results.length === 0 || !results[0].projeto_selecionado) {
-        console.error('Projeto selecionado não encontrado para o usuário:', userNome);
-        res.status(404).send('Projeto selecionado não encontrado para o usuário');
-        return;
-    }
-
-    // Nome do projeto selecionado
-    const projetoSelecionado = results[0].projeto_selecionado;
-
-    // Consulta SQL para buscar todas as tarefas associadas ao projeto selecionado pelo usuário
-    const sqlTarefas = `
-        SELECT tarefas.id, tarefas.nome, tarefas.status 
-        FROM tarefas
-        INNER JOIN projetos ON tarefas.projeto_id = projetos.id
-        INNER JOIN usuarios ON projetos.usuario_nome = usuarios.nome
-        WHERE projetos.nome = ? AND usuarios.nome = ?
-    `;
-
-    // Executar a consulta SQL para buscar as tarefas do projeto selecionado pelo usuário
-    conexao.query(sqlTarefas, [projetoSelecionado, userNome], (error, results, fields) => {
+    //executar a consulta SQL para obter o projeto selecionado pelo usuário
+    conexao.query(sqlProjetoSelecionado, [userNome], (error, results, fields) => {
         if (error) {
-            console.error('Erro ao buscar as tarefas do projeto selecionado:', error);
-            res.status(500).send('Erro ao buscar as tarefas do projeto selecionado');
+            console.error('Erro ao buscar o projeto selecionado do usuário:', error);
+            res.status(500).send('Erro ao buscar o projeto selecionado do usuário');
             return;
         }
 
-        // Enviar as tarefas encontradas como resposta
-        res.json(results);
-    });
-});
+        //verificar se o projeto foi encontrado
+        if (results.length === 0 || !results[0].projeto_selecionado) {
+            console.error('Projeto selecionado não encontrado para o usuário:', userNome);
+            res.status(404).send('Projeto selecionado não encontrado para o usuário');
+            return;
+        }
 
+        //nome do projeto selecionado
+        const projetoSelecionado = results[0].projeto_selecionado;
+
+        //consulta SQL para buscar todas as tarefas associadas ao projeto selecionado pelo usuário
+        const sqlTarefas = `
+            SELECT tarefas.id, tarefas.nome, tarefas.status 
+            FROM tarefas
+            INNER JOIN projetos ON tarefas.projeto_id = projetos.id
+            INNER JOIN usuarios ON projetos.usuario_nome = usuarios.nome
+            WHERE projetos.nome = ? AND usuarios.nome = ?
+        `;
+
+        //executar a consulta SQL para buscar as tarefas do projeto selecionado pelo usuário
+        conexao.query(sqlTarefas, [projetoSelecionado, userNome], (error, results, fields) => {
+            if (error) {
+                console.error('Erro ao buscar as tarefas do projeto selecionado:', error);
+                res.status(500).send('Erro ao buscar as tarefas do projeto selecionado');
+                return;
+            }
+
+            //enviar as tarefas encontradas como resposta
+            res.json(results);
+        });
+    });
 }
 
 function concluir_tarefas(req, res) {
-    // Obter as tarefas marcadas como concluídas do corpo da requisição
+    //obter as tarefas marcadas como concluídas do corpo da requisição
     const tarefasConcluidas = JSON.parse(req.body.tarefasConcluidas);
 
     console.log(tarefasConcluidas);
     
-    // Verificar se existem tarefas a serem concluídas
+    //verificar se existem tarefas a serem concluídas
     if (tarefasConcluidas.length === 0) {
         console.error('Nenhuma tarefa a ser concluída foi fornecida.');
         res.status(400).send('Nenhuma tarefa a ser concluída foi fornecida.');
         return;
     }
     
-    // Atualizar o status das tarefas no banco de dados para 'done'
+    //atualizar o status das tarefas no banco de dados para 'done'
     const sql = 'UPDATE tarefas SET status = "done" WHERE nome IN (?)';
 
-    // Executar a consulta SQL para atualizar o status das tarefas
+    //executar a consulta SQL para atualizar o status das tarefas
     conexao.query(sql, [tarefasConcluidas], (error, results, fields) => {
         if (error) {
             console.error('Erro ao atualizar o status das tarefas:', error);
-            // Responder à requisição com um status de erro
-            res.sendStatus(500); // Ou outro código de status de erro adequado
+            res.sendStatus(500); 
             return;
         }
 
         console.log('Status das tarefas atualizado com sucesso!');
         
-        // Após a atualização bem-sucedida, redirecione para a página principal
-        res.redirect('/pagina_principal'); // Substitua '/pagina_principal' pela rota da sua página principal
+        //após a atualização bem-sucedida, redirecione para a página principal
+        res.redirect('/pagina_principal'); 
     });
 }
 
-// Função para apagar uma tarefa do banco de dados
+//função para apagar uma tarefa do banco de dados
 function apagarTarefa(req, res) {
     const nomeTarefa = req.body.nomeTarefa;
-    const userNome = req.session.usuario.nome; // Obter o nome do usuário logado
+    const userNome = req.session.usuario.nome; 
 
-    // Consulta SQL para apagar a tarefa com base no nome e no ID do usuário
+    //consulta SQL para apagar a tarefa com base no nome e no ID do usuário
     const sql = `
         DELETE FROM tarefas
         WHERE nome = ? AND projeto_id IN (
@@ -414,7 +407,7 @@ function apagarTarefa(req, res) {
         )
     `;
 
-    // Executar a consulta SQL para apagar a tarefa
+    //executar a consulta SQL para apagar a tarefa
     conexao.query(sql, [nomeTarefa, userNome], (error, results, fields) => {
         if (error) {
             console.error('Erro ao apagar a tarefa:', error);
@@ -430,7 +423,7 @@ function apagarTarefa(req, res) {
 
 
 
-// Exportar funções
+//exportar funções
 module.exports = {
     pagina_login,
     pagina_cadastro,

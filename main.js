@@ -7,16 +7,13 @@ const { engine } = require('express-handlebars');
 //importar modulo de rotas
 const rotas = require('./rotas/rotas_agenda');
 
-//importar bootstrap
-//const bootstrap = require('bootstrap');
-
 //App
 const app = express();
 
 //importar express-session
 const session = require('express-session');
 
-// Use a session middleware
+//use a session middleware
 app.use(session({
   secret: 'sua_chave_secreta',
   resave: false,
@@ -35,7 +32,7 @@ app.use('/javascript', express.static('./javascript'));
 //configuração do express-handlebars
 app.engine('handlebars', engine({
     helpers:{
-        //Função auxiliar para verificar igualdade
+        //função auxiliar para verificar igualdade
         condicionalIgualdade: function(parametro1, parametro2, options){
             return parametro1 === parametro2 ? options.fn(this) : options.inverse(this);
         }
@@ -44,7 +41,7 @@ app.engine('handlebars', engine({
 app.set('view engine', 'handlebars');
 app.set('views', './views');
 
-// manipulação de dados via rotas
+//manipulação de dados via rotas
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 
