@@ -289,51 +289,52 @@ function mostrarTarefasDoProjeto(req, res) {
     const userNome = req.session.usuario.nome;
 
     // Consulta SQL para obter o ID do projeto do usuário logado
-    const sqlProjetoId = `
-        SELECT projetos.id
-        FROM projetos
+    const sqlProjetoSelecionado = `
+    SELECT projeto_selecionado
+    FROM usuarios
+    WHERE nome = ?;
+`;
+
+// Executar a consulta SQL para obter o projeto selecionado pelo usuário
+conexao.query(sqlProjetoSelecionado, [userNome], (error, results, fields) => {
+    if (error) {
+        console.error('Erro ao buscar o projeto selecionado do usuário:', error);
+        res.status(500).send('Erro ao buscar o projeto selecionado do usuário');
+        return;
+    }
+
+    // Verificar se o projeto foi encontrado
+    if (results.length === 0 || !results[0].projeto_selecionado) {
+        console.error('Projeto selecionado não encontrado para o usuário:', userNome);
+        res.status(404).send('Projeto selecionado não encontrado para o usuário');
+        return;
+    }
+
+    // Nome do projeto selecionado
+    const projetoSelecionado = results[0].projeto_selecionado;
+
+    // Consulta SQL para buscar todas as tarefas associadas ao projeto selecionado pelo usuário
+    const sqlTarefas = `
+        SELECT tarefas.id, tarefas.nome, tarefas.status 
+        FROM tarefas
+        INNER JOIN projetos ON tarefas.projeto_id = projetos.id
         INNER JOIN usuarios ON projetos.usuario_nome = usuarios.nome
-        WHERE usuarios.nome = ?;
+        WHERE projetos.nome = ? AND usuarios.nome = ?
     `;
 
-    // Executar a consulta SQL para obter o ID do projeto do usuário logado
-    conexao.query(sqlProjetoId, [userNome], (error, results, fields) => {
+    // Executar a consulta SQL para buscar as tarefas do projeto selecionado pelo usuário
+    conexao.query(sqlTarefas, [projetoSelecionado, userNome], (error, results, fields) => {
         if (error) {
-            console.error('Erro ao buscar o ID do projeto do usuário:', error);
-            res.status(500).send('Erro ao buscar o ID do projeto do usuário');
+            console.error('Erro ao buscar as tarefas do projeto selecionado:', error);
+            res.status(500).send('Erro ao buscar as tarefas do projeto selecionado');
             return;
         }
 
-        // Verificar se o projeto foi encontrado
-        if (results.length === 0) {
-            console.error('Projeto não encontrado para o usuário:', userNome);
-            res.status(404).send('Projeto não encontrado para o usuário');
-            return;
-        }
-
-        // ID do projeto do usuário logado
-        const projetoId = results[0].id;
-
-        // Consulta SQL para buscar todas as tarefas associadas ao projeto do usuário logado
-        const sqlTarefas = `
-            SELECT tarefas.id, tarefas.nome, tarefas.status 
-            FROM tarefas
-            INNER JOIN projetos ON tarefas.projeto_id = projetos.id
-            WHERE projetos.id = ?;
-        `;
-
-        // Executar a consulta SQL para buscar as tarefas do projeto
-        conexao.query(sqlTarefas, [projetoId], (error, results, fields) => {
-            if (error) {
-                console.error('Erro ao buscar as tarefas do projeto:', error);
-                res.status(500).send('Erro ao buscar as tarefas do projeto');
-                return;
-            }
-
-            // Enviar as tarefas encontradas como resposta
-            res.json(results);
-        });
+        // Enviar as tarefas encontradas como resposta
+        res.json(results);
     });
+});
+
 }
 
 function concluir_tarefas(req, res) {
