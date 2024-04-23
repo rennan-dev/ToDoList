@@ -1,3 +1,15 @@
+// Verifica se o alerta já foi exibido anteriormente
+const alertaExibido = localStorage.getItem('alertaExibido');
+// Se o alerta ainda não foi exibido, exibe-o e salva o sinalizador no Local Storage
+if (!alertaExibido) {
+    const params = new URLSearchParams(window.location.search);
+    const erro = params.get('erro');
+    if (erro) {
+        alert(erro);
+        localStorage.setItem('alertaExibido', 'true');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     var modal = document.getElementById("modal");
     var addButton = document.getElementById("addButton");

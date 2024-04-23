@@ -25,33 +25,51 @@ function cadastrar_novo_usuario(req, res) {
         return res.render('cadastro', { erro: 'Senha e Confirmar senha precisam estar iguais.' });
     }
 
-    const sqlInsertUsuario = "INSERT INTO usuarios (nome, email, senha, projeto_selecionado) VALUES (?, ?, ?, ?)";
-    const valuesUsuario = [nome, email, senha, 'Hoje'];
+    // Consulta SQL para verificar se o nome de usuário ou o email já existem no banco de dados
+    const sqlVerificarExistencia = "SELECT * FROM usuarios WHERE nome = ? OR email = ?";
+    const valuesExistencia = [nome, email];
 
-    conexao.query(sqlInsertUsuario, valuesUsuario, function(err, result) {
+    conexao.query(sqlVerificarExistencia, valuesExistencia, function(err, result) {
         if (err) {
-            console.log('Erro ao inserir novo usuário:', err.message);
+            console.log('Erro ao verificar existência de usuário:', err.message);
             return res.render('cadastro', { erro: 'Erro ao criar conta.' });
         }
 
-        // Criação do projeto 'Hoje' para o novo usuário
-        const sqlInsertProjeto = "INSERT INTO projetos (nome, usuario_nome) VALUES (?, ?)";
-        const valuesProjeto = ['Hoje', nome];
+        // Se já existe um usuário com o mesmo nome ou email, retornar mensagem de erro
+        if (result.length > 0) {
+            console.log('Nome de usuário ou email já existem no banco de dados');
+            return res.render('cadastro', { erro: 'Nome de usuário ou email já cadastrados.' });
+        }
 
-        conexao.query(sqlInsertProjeto, valuesProjeto, function(err, result) {
+        // Se não existir usuário com o mesmo nome ou email, proceder com a inserção
+        const sqlInsertUsuario = "INSERT INTO usuarios (nome, email, senha, projeto_selecionado) VALUES (?, ?, ?, ?)";
+        const valuesUsuario = [nome, email, senha, 'Hoje'];
+
+        conexao.query(sqlInsertUsuario, valuesUsuario, function(err, result) {
             if (err) {
-                console.log('Erro ao criar projeto "Hoje":', err.message);
+                console.log('Erro ao inserir novo usuário:', err.message);
                 return res.render('cadastro', { erro: 'Erro ao criar conta.' });
             }
 
-            console.log('Novo usuário e projeto "Hoje" criados com sucesso!');
-            req.session.usuario = {
-                nome: nome,
-                email: email,
-                projeto_selecionado: 'Hoje'
-            };
+            // Criação do projeto 'Hoje' para o novo usuário
+            const sqlInsertProjeto = "INSERT INTO projetos (nome, usuario_nome) VALUES (?, ?)";
+            const valuesProjeto = ['Hoje', nome];
 
-            res.redirect('/pagina_principal');
+            conexao.query(sqlInsertProjeto, valuesProjeto, function(err, result) {
+                if (err) {
+                    console.log('Erro ao criar projeto "Hoje":', err.message);
+                    return res.render('cadastro', { erro: 'Erro ao criar conta.' });
+                }
+
+                console.log('Novo usuário e projeto "Hoje" criados com sucesso!');
+                req.session.usuario = {
+                    nome: nome,
+                    email: email,
+                    projeto_selecionado: 'Hoje'
+                };
+
+                res.redirect('/pagina_principal');
+            });
         });
     });
 }
@@ -87,7 +105,6 @@ function pagina_principal(req, res){
         res.redirect('/login');
     }
 }
-
 
 function logout(req, res) {
     // Destrua a sessão
@@ -142,19 +159,6 @@ function login_usuario(req, res) {
         }
     });
 }
-//res.redirect('/pagina_principal');
-//res.render('pagina_principal', { session: req.session });
-
-//verificar se o usuarioestá logado
-// function verificarSessao(req, res, next) {
-//     if (req.session && req.session.usuario) {
-//         // O usuário está autenticado
-//         next();
-//     } else {
-//         // O usuário não está autenticado, redirecionar para a página de login
-//         res.redirect('/login');
-//     }
-// }
 
 function obterProjetosUsuario(req, res) {
     // Verificar se o usuário está autenticado
@@ -188,23 +192,40 @@ function adicionarLista(req, res) {
 
     // Verificar se o nome da lista não está vazio
     if (!nomeLista) {
-        return res.status(400).json({ erro: 'O nome da lista não pode estar vazio' });
+        return res.status(400).send('<script>alert("A lista não pode ser enviada vazia"); window.location.href = "/pagina_principal";</script>');
     }
 
-    // Inserir os dados da nova lista na tabela de projetos
-    const sql = 'INSERT INTO projetos (nome, usuario_nome) VALUES (?, ?)';
-    const values = [nomeLista, usuarioNome];
+    // Consulta SQL para verificar se o usuário já possui um projeto com o mesmo nome
+    const sqlVerificarProjeto = 'SELECT * FROM projetos WHERE nome = ? AND usuario_nome = ?';
+    const valuesVerificarProjeto = [nomeLista, usuarioNome];
 
-    conexao.query(sql, values, (err, results) => {
+    conexao.query(sqlVerificarProjeto, valuesVerificarProjeto, (err, results) => {
         if (err) {
-            console.error('Erro ao adicionar lista de projetos:', err);
-            return res.status(500).json({ erro: 'Erro ao adicionar lista de projetos' });
+            console.error('Erro ao verificar projeto:', err);
+            return res.status(500).send('<script>alert("Erro ao verificar projeto"); window.location.href = "/pagina_principal";</script>');
         }
 
-        // Redirecionar o usuário de volta para a página principal após a inserção bem-sucedida
-        res.redirect('/pagina_principal');
+        // Se já existir um projeto com o mesmo nome para o usuário, enviar mensagem de erro
+        if (results.length > 0) {
+            return res.status(400).send('<script>alert("Já existe uma lista com esse nome"); window.location.href = "/pagina_principal";</script>');
+        }
+
+        // Inserir os dados da nova lista na tabela de projetos
+        const sql = 'INSERT INTO projetos (nome, usuario_nome) VALUES (?, ?)';
+        const values = [nomeLista, usuarioNome];
+
+        conexao.query(sql, values, (err, results) => {
+            if (err) {
+                console.error('Erro ao adicionar lista de projetos:', err);
+                return res.status(500).send('<script>alert("Erro ao adicionar lista de projetos"); window.location.href = "/pagina_principal";</script>');
+            }
+
+            // Redirecionar o usuário de volta para a página principal após a inserção bem-sucedida
+            return res.redirect('/pagina_principal');
+        });
     });
 }
+
 
 // Rota para selecionar um projeto
 function selecionar_projeto(req, res) {
@@ -231,8 +252,8 @@ function adicionarTarefa(req, res) {
     const userNome = req.session.usuario.nome;
 
     if (!nomeTarefa) {
-        console.error('O nome da tarefa não pode ser nulo.');
-        return;
+        // Mensagem de erro para nome da tarefa vazio
+        return res.status(400).send('<script>alert("O nome da tarefa não pode ser nulo."); window.location.href = "/pagina_principal";</script>');
     }
 
     // Consulta SQL para obter o nome do projeto selecionado pelo usuário
@@ -241,33 +262,33 @@ function adicionarTarefa(req, res) {
     // Executar a consulta SQL para obter o nome do projeto selecionado pelo usuário
     conexao.query(sqlProjetoSelecionado, [userNome], (error, results, fields) => {
         if (error) {
-            console.error('Erro ao buscar o projeto selecionado do usuário:', error);
-            return;
+            // Mensagem de erro ao buscar o projeto selecionado do usuário
+            return res.status(500).send(`<script>alert("Erro ao buscar o projeto selecionado do usuário: ${error.message}"); window.location.href = "/pagina_principal";</script>`);
         }
 
         // Verificar se o projeto foi encontrado
         if (results.length === 0 || !results[0].projeto_selecionado) {
-            console.error('Projeto selecionado não encontrado para o usuário:', userNome);
-            return;
+            // Mensagem de erro se o projeto selecionado não foi encontrado
+            return res.status(404).send('<script>alert("Projeto selecionado não encontrado para o usuário."); window.location.href = "/pagina_principal";</script>');
         }
 
         // Nome do projeto selecionado
         const projetoSelecionado = results[0].projeto_selecionado;
 
         // Consulta SQL para obter o ID do projeto selecionado pelo usuário
-        const sqlProjetoId = 'SELECT id FROM projetos WHERE nome = ?';
+        const sqlProjetoId = 'SELECT id FROM projetos WHERE nome = ? AND usuario_nome = ?';
 
         // Executar a consulta SQL para obter o ID do projeto selecionado pelo usuário
-        conexao.query(sqlProjetoId, [projetoSelecionado], (error, results, fields) => {
+        conexao.query(sqlProjetoId, [projetoSelecionado, userNome], (error, results, fields) => {
             if (error) {
-                console.error('Erro ao buscar o ID do projeto selecionado:', error);
-                return;
+                // Mensagem de erro ao buscar o ID do projeto selecionado
+                return res.status(500).send(`<script>alert("Erro ao buscar o ID do projeto selecionado: ${error.message}"); window.location.href = "/pagina_principal";</script>`);
             }
 
             // Verificar se o projeto foi encontrado
             if (results.length === 0) {
-                console.error('Projeto não encontrado:', projetoSelecionado);
-                return;
+                // Mensagem de erro se o projeto não foi encontrado
+                return res.status(404).send('<script>alert("Projeto não encontrado."); window.location.href = "/pagina_principal";</script>');
             }
 
             // ID do projeto selecionado
@@ -282,17 +303,17 @@ function adicionarTarefa(req, res) {
             // Executar a consulta SQL para inserir a nova tarefa
             conexao.query(insertQuery, [nomeTarefa, status, projetoId], (error, results, fields) => {
                 if (error) {
-                    console.error('Erro ao inserir a tarefa:', error);
-                    return;
+                    // Mensagem de erro ao inserir a tarefa
+                    return res.status(500).send(`<script>alert("Erro ao inserir a tarefa: ${error.message}"); window.location.href = "/pagina_principal";</script>`);
                 }
 
-                console.log('Tarefa inserida com sucesso!');
-
-                res.redirect('/pagina_principal');
+                // Mensagem de sucesso ao inserir a tarefa
+                return res.status(200).send('<script>alert("Tarefa inserida com sucesso!"); window.location.href = "/pagina_principal";</script>');
             });
         });
     });
 }
+
 
 function mostrarTarefasDoProjeto(req, res) {
     const userNome = req.session.usuario.nome;

@@ -11,7 +11,7 @@ const servico = require('../servicos/agenda_servico');
 
 //rota principal
 router.get('/', function(req, res){
-    servico.pagina_inicial(req,res);
+    servico.pagina_principal(req,res);
 });
 
 router.get('/login', function(req, res){
