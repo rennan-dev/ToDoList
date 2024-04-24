@@ -1,3 +1,12 @@
+//********************************************
+//Todas as importações das funções
+//estão no final do código
+//vá para o final para ver todas
+// as funções desenvolvidas nesse projeto
+//********************************************
+
+
+
 // Importar o módulo de conexão com banco MySQL
 const conexao = require('../banco_de_dados/conexao');
 
@@ -14,6 +23,26 @@ function cadastrar_novo_usuario(req, res) {
     const email = req.body.email;
     const senha = req.body.senha;
     const confirmarSenha = req.body.confirmarSenha;
+
+    //verificar se há espaços em branco no nome, email e senhas
+    if (nome.trim() === '' || email.trim() === '' || senha.trim() === '' || confirmarSenha.trim() === '') {
+        return res.render('cadastro', { erro: 'Por favor, preencha todos os campos.' });
+    }
+
+    //verificar se há espaços em branco no username
+    if (nome.includes(' ')) {
+        return res.render('cadastro', { erro: 'O username não pode conter espaços em branco.' });
+    }
+
+    //verificar se há espaços em branco no email
+    if (email.includes(' ')) {
+        return res.render('cadastro', { erro: 'O email não pode conter espaços em branco.' });
+    }
+
+    //verificar se há espaços em branco nas senhas
+    if (senha.includes(' ') || confirmarSenha.includes(' ')) {
+        return res.render('cadastro', { erro: 'A senha não pode conter espaços em branco.' });
+    }
 
     if (!nome || !email || !senha || !confirmarSenha) {
         console.log('Erro primordial');
@@ -187,8 +216,14 @@ function adicionarLista(req, res) {
     const nomeLista = req.body.nome; 
     const usuarioNome = req.session.usuario.nome; 
 
+    //verificar se há espaços em branco
+    if(nomeLista.trim() === '') {
+        return res.status(400).send('<script>alert("A lista não pode ser enviada vazia"); window.location.href = "/pagina_principal";</script>');
+    }
+
+
     //verificar se o nome da lista não está vazio
-    if (!nomeLista) {
+    if(!nomeLista) {
         return res.status(400).send('<script>alert("A lista não pode ser enviada vazia"); window.location.href = "/pagina_principal";</script>');
     }
 
@@ -246,6 +281,11 @@ function selecionar_projeto(req, res) {
 function adicionarTarefa(req, res) {
     const nomeTarefa = req.body.nomeDaTarefa;
     const userNome = req.session.usuario.nome;
+
+    //verificar se há espaços em branco
+    if(nomeTarefa.trim() === '') {
+        return res.status(400).send('<script>alert("O nome da tarefa não pode ser nulo."); window.location.href = "/pagina_principal";</script>');
+    }
 
     if (!nomeTarefa) {
         return res.status(400).send('<script>alert("O nome da tarefa não pode ser nulo."); window.location.href = "/pagina_principal";</script>');
@@ -419,8 +459,6 @@ function apagarTarefa(req, res) {
         res.sendStatus(200);
     });
 }
-
-
 
 
 //exportar funções
