@@ -7,11 +7,9 @@ const router = express.Router();
 // Importar módulo de serviços
 const servico = require('../servicos/agenda_servico');
 
-// *** ADICIONE SUAS ROTAS AQUI
-
 //rota principal
 router.get('/', function(req, res){
-    servico.pagina_inicial(req,res);
+    servico.pagina_principal(req,res);
 });
 
 router.get('/login', function(req, res){
@@ -42,8 +40,32 @@ router.post('/adicionar_projeto', function(req,res) {
     servico.adicionar_projeto(req,res);
 });
 
-router.get('/listar_projetos', function(req,res) {
-    servico.listarProjetos(req,res);
+router.get('/projetos', function(req, res) {
+    servico.obterProjetosUsuario(req, res);
+});
+
+router.post('/adicionar_lista', function(req, res) {
+    servico.adicionarLista(req, res);
+});
+
+router.post('/selecionar_projeto', function(req, res) {
+    servico.selecionar_projeto(req, res);
+});
+
+router.post('/adicionar_tarefa', function(req,res) {
+    servico.adicionarTarefa(req,res);
+});
+
+router.get('/mostrar_tarefas', function(req, res) {
+    servico.mostrarTarefasDoProjeto(req, res);
+});
+
+router.post('/concluir_tarefas', function(req,res) {
+    servico.concluir_tarefas(req,res);
+});
+
+router.post('/apagar_tarefa', function(req,res) {
+    servico.apagarTarefa(req,res);
 });
 
 // Exportar o router
