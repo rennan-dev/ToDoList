@@ -4,8 +4,8 @@ const mysql = require('mysql2');
 //configuração de conexão
 const conexao = mysql.createConnection({
     host:'localhost',
-    user:'root',
-    password: '',
+    user:'mysql',
+    password: 'mysql',
     database:'agenda'
 });
 

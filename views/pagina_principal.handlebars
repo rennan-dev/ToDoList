@@ -16,7 +16,7 @@
                     </form>
                     <div class="mt-4">
                         <h5>Sua(s) Lista(s)</h5>
-                        <ul id="lista-projetos" style="list-style: none; text-decoration: none; display: inline-block;">
+                        <ul id="lista-projetos" style="list-style: none; text-decoration: none; display: inline-block; max-height: 100px; overflow-y: auto;">
                             {{#each projetos}}
                                 <li class="projeto" data-nome="{{this}}">{{this}}</li>
                             {{/each}}
@@ -44,13 +44,13 @@
                     <div class="row">
                         <div class="col">
                             <h5>To do</h5>
-                            <div id="toDoTasks">
+                            <div id="toDoTasks" style="max-height: 190px; overflow-y: auto; max-width: 200px">
                                 <!-- Aqui serão exibidas as tarefas 'To do' -->
                             </div>
                         </div>
                         <div class="col">
                             <h5>Done</h5>
-                            <div id="doneTasks">
+                            <div id="doneTasks" style="max-height: 150px; overflow-y: auto; max-width: 200px">
                                 <!-- Aqui serão exibidas as tarefas 'Done' -->
                             </div>
                         </div>
